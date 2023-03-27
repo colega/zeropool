@@ -25,15 +25,15 @@ The second drawback is a major one, and actually is the reason why [Staticcheck 
 var pool = sync.Pool{New: func() any { return new([]byte) }}
 
 func do() {
-buf := pool.Get().(*[]byte)
+	buf := pool.Get().(*[]byte)
 
-*buf = somethingThatNeedsABuffer(*buf)
-pool.Put(buf[:0])
+	*buf = somethingThatNeedsABuffer(*buf)
+	pool.Put(buf[:0])
 }
 
 func somethingThatNeedsABuffer(buf []byte) buf {
-buf = append(buf, []byte("something uselesss")...)
-return buf
+	buf = append(buf, []byte("something uselesss")...)
+	return buf
 }
 ```
 
@@ -45,8 +45,8 @@ However, sometimes[^2][^3][^4] we would want to pass that buffer to a function t
 var pool = sync.Pool{New: func() any { return new([]byte) }}
 
 func do() {
-    buf := pool.Get().(*[]byte)
-    go somethingThatNeedsABuffer(*buf)
+	buf := pool.Get().(*[]byte)
+	go somethingThatNeedsABuffer(*buf)
 }
 
 func somethingThatNeedsABuffer(buf []byte) {
@@ -63,8 +63,8 @@ Enter `zeropool`:
 var pool = zeropool.New(func() []byte { return nil })
 
 func do() {
-    buf := pool.Get()
-    go somethingThatNeedsABuffer(buf)
+	buf := pool.Get()
+	go somethingThatNeedsABuffer(buf)
 }
 
 func somethingThatNeedsABuffer(buf []byte) {
