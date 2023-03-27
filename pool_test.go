@@ -2,11 +2,10 @@ package zeropool_test
 
 import (
 	"math"
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 
 	"github.com/colega/zeropool"
 )
@@ -15,19 +14,19 @@ func TestPool(t *testing.T) {
 	t.Run("provides correct values", func(t *testing.T) {
 		pool := zeropool.New(func() []byte { return make([]byte, 1024) })
 		item1 := pool.Get()
-		require.Equal(t, 1024, len(item1))
+		assertEqual(t, 1024, len(item1))
 
 		item2 := pool.Get()
-		require.Equal(t, 1024, len(item2))
+		assertEqual(t, 1024, len(item2))
 
 		pool.Put(item1)
 		pool.Put(item2)
 
 		item1 = pool.Get()
-		require.Equal(t, 1024, len(item1))
+		assertEqual(t, 1024, len(item1))
 
 		item2 = pool.Get()
-		require.Equal(t, 1024, len(item2))
+		assertEqual(t, 1024, len(item2))
 	})
 
 	t.Run("is not racy", func(t *testing.T) {
@@ -76,7 +75,7 @@ func TestPool(t *testing.T) {
 			slice := pool.Get()
 			pool.Put(slice)
 		})
-		require.Equal(t, float64(0), allocs, "Should not allocate.")
+		assertEqualf(t, float64(0), allocs, "Should not allocate.")
 	})
 }
 
@@ -145,5 +144,21 @@ func BenchmarkSyncPoolPointer(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		item := pool.Get().(*[]byte)
 		pool.Put(item)
+	}
+}
+
+func assertEqual(t *testing.T, expected, got interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(expected, got) {
+		t.Logf("Expected %v, got %v", expected, got)
+		t.Fail()
+	}
+}
+
+func assertEqualf(t *testing.T, expected, got interface{}, msg string, args ...any) {
+	t.Helper()
+	if !reflect.DeepEqual(expected, got) {
+		t.Logf("Expected %v, got %v", expected, got)
+		t.Errorf(msg, args...)
 	}
 }
