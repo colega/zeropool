@@ -1,4 +1,4 @@
-# `zeropool` is a type-safe zero-allocation sync.Pool
+# `zeropool` is a type-safe zero-allocation `sync.Pool`
 
 ## TL;DR
 
