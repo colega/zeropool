@@ -1,4 +1,4 @@
-# `zeropool` is a type-safe zero-allocation sync.Pool alternative for Go
+# `zeropool` is a type-safe zero-allocation sync.Pool
 
 ## TL;DR
 
