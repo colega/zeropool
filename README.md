@@ -67,7 +67,12 @@ Replace your `sync.Pool` implementation by `zeropool.Pool`, and you also get the
 ## How does it work?
 
 `zeropool` maintains two `sync.Pool` instances: one is used as the main pool for pointers to the stored items. 
-The second pool is used to hold the pointers while the code is using the items from the pool. 
+The second pool is used to hold the pointers while the code is using the items from the pool.
+
+## Performance
+
+It is approximately ~2x slower than `sync.Pool` if what you are storing are pointers: it doesn't make sense to pay the price in that case.
+However, if you have no option but to store elements, and you need to allocate new pointers to store into `sync.Pool`, `zeropool` becomes 2-3x faster.
 
 [^1]: Some smaller types, like scalar values, can be stored in an interface type without allocation, but you wouldn't use a `sync.Pool` for those, right?
 

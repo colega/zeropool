@@ -79,3 +79,71 @@ func TestPool(t *testing.T) {
 		require.Equal(t, float64(0), allocs, "Should not allocate.")
 	})
 }
+
+func BenchmarkZeropoolPool(b *testing.B) {
+	pool := zeropool.New(func() []byte { return make([]byte, 1024) })
+
+	// Warmup
+	item := pool.Get()
+	pool.Put(item)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		item := pool.Get()
+		pool.Put(item)
+	}
+}
+
+// BenchmarkSyncPoolValue uses sync.Pool to store values, which makes an allocation on each Put call.
+func BenchmarkSyncPoolValue(b *testing.B) {
+	pool := sync.Pool{New: func() any {
+		return make([]byte, 1024)
+	}}
+
+	// Warmup
+	item := pool.Get().([]byte)
+	pool.Put(item) // This allocates.
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		item := pool.Get().([]byte)
+		pool.Put(item) // This allocates.
+	}
+}
+
+// BenchmarkSyncPoolNewPointer uses sync.Pool to store pointers, but it calls Put with a new pointer every time.
+func BenchmarkSyncPoolNewPointer(b *testing.B) {
+	pool := sync.Pool{New: func() any {
+		v := make([]byte, 1024)
+		return &v
+	}}
+
+	// Warmup
+	item := pool.Get().(*[]byte)
+	pool.Put(item) // This allocates.
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		item := pool.Get().(*[]byte)
+		buf := *item
+		pool.Put(&buf) // New pointer.
+	}
+}
+
+// BenchmarkSyncPoolPointer illustrates the optimal usage of sync.Pool, not always possible.
+func BenchmarkSyncPoolPointer(b *testing.B) {
+	pool := sync.Pool{New: func() any {
+		v := make([]byte, 1024)
+		return &v
+	}}
+
+	// Warmup
+	item := pool.Get().(*[]byte)
+	pool.Put(item) // This allocates.
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		item := pool.Get().(*[]byte)
+		pool.Put(item)
+	}
+}
