@@ -101,12 +101,12 @@ func BenchmarkSyncPoolValue(b *testing.B) {
 
 	// Warmup
 	item := pool.Get().([]byte)
-	pool.Put(item) // This allocates.
+	pool.Put(item) //nolint:staticcheck // This allocates.
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		item := pool.Get().([]byte)
-		pool.Put(item) // This allocates.
+		pool.Put(item) //nolint:staticcheck // This allocates.
 	}
 }
 
@@ -119,13 +119,13 @@ func BenchmarkSyncPoolNewPointer(b *testing.B) {
 
 	// Warmup
 	item := pool.Get().(*[]byte)
-	pool.Put(item) // This allocates.
+	pool.Put(item) //nolint:staticcheck // This allocates.
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		item := pool.Get().(*[]byte)
 		buf := *item
-		pool.Put(&buf) // New pointer.
+		pool.Put(&buf) //nolint:staticcheck  // New pointer.
 	}
 }
 
@@ -138,7 +138,7 @@ func BenchmarkSyncPoolPointer(b *testing.B) {
 
 	// Warmup
 	item := pool.Get().(*[]byte)
-	pool.Put(item) // This allocates.
+	pool.Put(item)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
