@@ -3,9 +3,14 @@
 ## TL;DR
 
 ```go
-pool := zeropool.New(func() []byte { return nil }) // The function provided makes a zeropool.Pool of a correct type using generics.
-buf := pool.Get() // This is a []byte, no need to make type-assertion, no need to de-reference.
-pool.Put(buf) // This does not allocate.
+// The function provided to zeropool.New() makes a Pool of a correct type using generics.
+pool := zeropool.New(func() []byte { return nil })
+
+// This is a []byte, no need to make type-assertion, no need to de-reference.
+buf := pool.Get()
+
+// This does not allocate.
+pool.Put(buf)
 ```
 
 ## Why?
