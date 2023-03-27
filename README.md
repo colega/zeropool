@@ -25,21 +25,21 @@ The second drawback is a major one, and actually is the reason why [Staticcheck 
 var pool = sync.Pool{New: func() any { return new([]byte) }}
 
 func do() {
-    buf := pool.Get().(*[]byte)
-    
-    *buf = somethingThatNeedsABuffer(*buf)
-    pool.Put(buf[:0])
+buf := pool.Get().(*[]byte)
+
+*buf = somethingThatNeedsABuffer(*buf)
+pool.Put(buf[:0])
 }
 
 func somethingThatNeedsABuffer(buf []byte) buf {
-	buf = append(buf, []byte("something uselesss")...)
-	return buf
+buf = append(buf, []byte("something uselesss")...)
+return buf
 }
 ```
 
 Not great (we have to do a type assertion), not terrible (the scope is small).
 
-However, sometimes we would want to pass that buffer to a function that would only accept `[]byte`, and that has its own lifecycle so it would take the responsibility of putting it back to the pool:
+However, sometimes[^2][^3][^4] we would want to pass that buffer to a function that would only accept `[]byte`, and that has its own lifecycle so it would take the responsibility of putting it back to the pool:
 
 ```go
 var pool = sync.Pool{New: func() any { return new([]byte) }}
@@ -79,7 +79,7 @@ Replace your `sync.Pool` implementation by `zeropool.Pool`, and you also get the
 
 ## How does it work?
 
-`zeropool` maintains two `sync.Pool` instances: one is used as the main pool for pointers to the stored items. 
+`zeropool` maintains two `sync.Pool` instances: one is used as the main pool for pointers to the stored items.
 The second pool is used to hold the pointers while the code is using the items from the pool.
 
 ## Performance
@@ -113,4 +113,6 @@ Note that we're talking about nanoseconds here, and if you found this library yo
 ```
 
 [^1]: Some smaller types, like scalar values, can be stored in an interface type without allocation, but you wouldn't use a `sync.Pool` for those, right?
-
+[^2]: [SA6002 ignored in Prometheus' head_append.go](https://github.com/prometheus/prometheus/blob/211ae4f1f0a2cdaae09c4c52735f75345c1817c6/tsdb/head_append.go#L206)
+[^3]: [SA6002 ignored in Kubernetes' client.go](https://github.com/kubernetes-sigs/metrics-server/blob/c9bc643883fbb438e2e128caab1e3498f1528cfd/pkg/scraper/client/resource/client.go#L95)
+[^4]: [GitHub search for SA6002](https://github.com/search?q=SA6002&type=code)
