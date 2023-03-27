@@ -1,5 +1,13 @@
 # `zeropool` is a type-safe zero-allocation sync.Pool alternative for Go
 
+## TL;DR
+
+```go
+pool := zeropool.New(func() []byte { return nil }) // The function provided makes a zeropool.Pool of a correct type using generics.
+buf := pool.Get() // This is a []byte, no need to make type-assertion, no need to de-reference.
+pool.Put(buf) // This does not allocate.
+```
+
 ## Why?
 
 [Go provides](https://pkg.go.dev/sync#Pool) `sync.Pool` pool implementation that allows storing `any` values (`interface{}` values). It is great but has two major drawbacks:

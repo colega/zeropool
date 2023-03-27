@@ -1,0 +1,36 @@
+goos: linux
+goarch: amd64
+pkg: github.com/colega/zeropool
+cpu: 11th Gen Intel(R) Core(TM) i7-11700K @ 3.60GHz
+BenchmarkZeropoolPool-16          	63954681	        17.93 ns/op	       0 B/op	       0 allocs/op
+BenchmarkZeropoolPool-16          	65895451	        17.82 ns/op	       0 B/op	       0 allocs/op
+BenchmarkZeropoolPool-16          	72448083	        17.52 ns/op	       0 B/op	       0 allocs/op
+BenchmarkZeropoolPool-16          	66490842	        17.87 ns/op	       0 B/op	       0 allocs/op
+BenchmarkZeropoolPool-16          	68611402	        17.44 ns/op	       0 B/op	       0 allocs/op
+BenchmarkZeropoolPool-16          	67215043	        17.42 ns/op	       0 B/op	       0 allocs/op
+BenchmarkZeropoolPool-16          	66775190	        17.94 ns/op	       0 B/op	       0 allocs/op
+BenchmarkZeropoolPool-16          	68257777	        17.45 ns/op	       0 B/op	       0 allocs/op
+BenchmarkZeropoolPool-16          	64458226	        17.72 ns/op	       0 B/op	       0 allocs/op
+BenchmarkZeropoolPool-16          	57566242	        17.88 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSyncPoolValue-16         	42314019	        50.51 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolValue-16         	24035661	        45.68 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolValue-16         	41673016	        48.55 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolValue-16         	29494654	        40.94 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolValue-16         	28761895	        40.65 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolValue-16         	42558696	        47.92 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolValue-16         	42674266	        41.41 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolValue-16         	32550166	        42.73 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolValue-16         	39063998	        44.26 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolValue-16         	27199605	        43.20 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolNewPointer-16    	18239673	        59.71 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolNewPointer-16    	28203342	        40.96 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolNewPointer-16    	41648168	        44.11 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolNewPointer-16    	34284454	        38.18 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolNewPointer-16    	29029803	        41.10 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolNewPointer-16    	34551633	        39.74 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolNewPointer-16    	40457389	        31.58 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolNewPointer-16    	30184395	        37.90 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolNewPointer-16    	30450024	        34.40 ns/op	      24 B/op	       1 allocs/op
+BenchmarkSyncPoolNewPointer-16    	36504705	        36.28 ns/op	      24 B/op	       1 allocs/op
+PASS
+ok  	github.com/colega/zeropool	43.856s
