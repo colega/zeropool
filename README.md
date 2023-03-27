@@ -87,5 +87,30 @@ The second pool is used to hold the pointers while the code is using the items f
 It is approximately ~2x slower than `sync.Pool` if what you are storing are pointers: it doesn't make sense to pay the price in that case.
 However, if you have no option but to store elements, and you need to allocate new pointers to store into `sync.Pool`, `zeropool` becomes 2-3x faster.
 
+```
+go test -run=X -bench=. -count=10 -benchmem | tee /tmp/zeropool.bench && benchstat -col .name /tmp/zeropool.bench
+goos: darwin
+goarch: amd64
+pkg: github.com/colega/zeropool
+cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
+     │ ZeropoolPool │            SyncPoolValue            │         SyncPoolNewPointer          │           SyncPoolPointer            │
+     │    sec/op    │   sec/op     vs base                │   sec/op     vs base                │    sec/op     vs base                │
+*-12    38.28n ± 2%   63.17n ± 0%  +65.00% (p=0.000 n=10)   62.77n ± 2%  +63.97% (p=0.000 n=10)   25.99n ± 38%  -32.13% (p=0.000 n=10)
+```
+
+Note that we're talking about nanoseconds here, and if you found this library you were probably more worried about that extra allocation we save:
+
+```
+     │ ZeropoolPool │        SyncPoolValue         │      SyncPoolNewPointer      │        SyncPoolPointer        │
+     │     B/op     │    B/op     vs base          │    B/op     vs base          │   B/op     vs base            │
+*-12      0.00 ± 0%   24.00 ± 0%  ? (p=0.000 n=10)   24.00 ± 0%  ? (p=0.000 n=10)   0.00 ± 0%  ~ (p=1.000 n=10) ¹
+¹ all samples are equal
+
+     │ ZeropoolPool │        SyncPoolValue         │      SyncPoolNewPointer      │        SyncPoolPointer         │
+     │  allocs/op   │ allocs/op   vs base          │ allocs/op   vs base          │ allocs/op   vs base            │
+*-12     0.000 ± 0%   1.000 ± 0%  ? (p=0.000 n=10)   1.000 ± 0%  ? (p=0.000 n=10)   0.000 ± 0%  ~ (p=1.000 n=10) ¹
+¹ all samples are equal
+```
+
 [^1]: Some smaller types, like scalar values, can be stored in an interface type without allocation, but you wouldn't use a `sync.Pool` for those, right?
 
