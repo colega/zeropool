@@ -77,6 +77,18 @@ func TestPool(t *testing.T) {
 		})
 		assertEqualf(t, float64(0), allocs, "Should not allocate.")
 	})
+
+	t.Run("zero value is valid", func(t *testing.T) {
+		var pool zeropool.Pool[[]byte]
+		slice := pool.Get()
+		pool.Put(slice)
+
+		allocs := testing.AllocsPerRun(1000, func() {
+			slice := pool.Get()
+			pool.Put(slice)
+		})
+		assertEqualf(t, float64(0), allocs, "Should not allocate.")
+	})
 }
 
 func BenchmarkZeropoolPool(b *testing.B) {

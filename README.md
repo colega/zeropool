@@ -3,8 +3,8 @@
 ## TL;DR
 
 ```go
-// The function provided to zeropool.New() makes a Pool of a correct type using generics.
-pool := zeropool.New(func() []byte { return nil })
+// Zero-value of zeropool.Pool is valid, although the constructor zeropool.New(item func() T) can be used if we want zero values to be initialized.
+var pool zeropool.Pool[[]byte]
 
 // This is a []byte, no need to make type-assertion, no need to de-reference.
 buf := pool.Get()
