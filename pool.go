@@ -8,7 +8,11 @@ import "sync"
 // It does that by storing the allocated pointers in a secondary pool instead of letting them go,
 // so they can be used later to store the items again.
 type Pool[T any] struct {
-	items    sync.Pool
+	// items holds pointers to the pooled items, which are valid to be used.
+	items sync.Pool
+	// pointers holds just pointers to the pooled item types.
+	// The values referenced by pointers are not valid to be used (as they're used by some other caller)
+	// and it is safe to overwrite these pointers.
 	pointers sync.Pool
 }
 
@@ -29,7 +33,7 @@ func New[T any](item func() T) Pool[T] {
 // Get may be called concurrently from multiple goroutines.
 func (p *Pool[T]) Get() T {
 	ptr := p.items.Get().(*T)
-	item := *ptr
+	item := *ptr // ptr still holds a reference to a copy of item, but nobody will use it.
 	p.pointers.Put(ptr)
 	return item
 }
