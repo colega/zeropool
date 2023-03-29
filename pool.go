@@ -43,7 +43,12 @@ func (p *Pool[T]) Get() T {
 	}
 
 	ptr := pooled.(*T)
-	item := *ptr // ptr still holds a reference to a copy of item, but nobody will use it.
+	item := *ptr
+	var zero T
+	// We don't want to retain the value in p.pointers.
+	// If T holds a reference to something, we want that to be garbage-collected
+	// if for some reason caller does less Put() calls than Get() calls.
+	*ptr = zero
 	p.pointers.Put(ptr)
 	return item
 }
