@@ -92,71 +92,167 @@ func TestPool(t *testing.T) {
 }
 
 func BenchmarkZeropoolPool(b *testing.B) {
-	pool := zeropool.New(func() []byte { return make([]byte, 1024) })
+	b.Run("same goroutine", func(b *testing.B) {
+		pool := zeropool.New(func() []byte { return make([]byte, 1024) })
 
-	// Warmup
-	item := pool.Get()
-	pool.Put(item)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+		// Warmup
 		item := pool.Get()
 		pool.Put(item)
-	}
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			item := pool.Get()
+			pool.Put(item)
+		}
+	})
+
+	b.Run("different goroutines", func(b *testing.B) {
+		pool := zeropool.New(func() []byte { return make([]byte, 1024) })
+
+		ch := make(chan []byte)
+		go func() {
+			for item := range ch {
+				pool.Put(item)
+			}
+		}()
+		defer close(ch)
+
+		// Warmup.
+		ch <- pool.Get()
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			ch <- pool.Get()
+		}
+	})
+
 }
 
 // BenchmarkSyncPoolValue uses sync.Pool to store values, which makes an allocation on each Put call.
 func BenchmarkSyncPoolValue(b *testing.B) {
-	pool := sync.Pool{New: func() any {
-		return make([]byte, 1024)
-	}}
+	b.Run("same goroutine", func(b *testing.B) {
+		pool := sync.Pool{New: func() any {
+			return make([]byte, 1024)
+		}}
 
-	// Warmup
-	item := pool.Get().([]byte)
-	pool.Put(item) //nolint:staticcheck // This allocates.
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+		// Warmup.
 		item := pool.Get().([]byte)
 		pool.Put(item) //nolint:staticcheck // This allocates.
-	}
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			item := pool.Get().([]byte)
+			pool.Put(item) //nolint:staticcheck // This allocates.
+		}
+	})
+
+	b.Run("different goroutines", func(b *testing.B) {
+		pool := sync.Pool{New: func() any {
+			return make([]byte, 1024)
+		}}
+
+		ch := make(chan []byte)
+		go func() {
+			for item := range ch {
+				pool.Put(item) //nolint:staticcheck // This allocates.
+			}
+		}()
+		defer close(ch)
+
+		// Warmup
+		ch <- pool.Get().([]byte)
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			ch <- pool.Get().([]byte)
+		}
+	})
 }
 
 // BenchmarkSyncPoolNewPointer uses sync.Pool to store pointers, but it calls Put with a new pointer every time.
 func BenchmarkSyncPoolNewPointer(b *testing.B) {
-	pool := sync.Pool{New: func() any {
-		v := make([]byte, 1024)
-		return &v
-	}}
+	b.Run("same goroutine", func(b *testing.B) {
+		pool := sync.Pool{New: func() any {
+			v := make([]byte, 1024)
+			return &v
+		}}
 
-	// Warmup
-	item := pool.Get().(*[]byte)
-	pool.Put(item) //nolint:staticcheck // This allocates.
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+		// Warmup
 		item := pool.Get().(*[]byte)
-		buf := *item
-		pool.Put(&buf) //nolint:staticcheck  // New pointer.
-	}
+		pool.Put(item)
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			item := pool.Get().(*[]byte)
+			buf := *item
+			pool.Put(&buf) //nolint:staticcheck  // New pointer.
+		}
+	})
+
+	b.Run("different goroutines", func(b *testing.B) {
+		pool := sync.Pool{New: func() any {
+			v := make([]byte, 1024)
+			return &v
+		}}
+		ch := make(chan []byte)
+		go func() {
+			for item := range ch {
+				pool.Put(&item) //nolint:staticcheck  // New pointer.
+			}
+		}()
+		defer close(ch)
+
+		// Warmup
+		ch <- *(pool.Get().(*[]byte))
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			ch <- *(pool.Get().(*[]byte))
+		}
+	})
 }
 
 // BenchmarkSyncPoolPointer illustrates the optimal usage of sync.Pool, not always possible.
 func BenchmarkSyncPoolPointer(b *testing.B) {
-	pool := sync.Pool{New: func() any {
-		v := make([]byte, 1024)
-		return &v
-	}}
+	b.Run("same goroutine", func(b *testing.B) {
+		pool := sync.Pool{New: func() any {
+			v := make([]byte, 1024)
+			return &v
+		}}
 
-	// Warmup
-	item := pool.Get().(*[]byte)
-	pool.Put(item)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+		// Warmup
 		item := pool.Get().(*[]byte)
 		pool.Put(item)
-	}
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			item := pool.Get().(*[]byte)
+			pool.Put(item)
+		}
+	})
+
+	b.Run("different goroutines", func(b *testing.B) {
+		pool := sync.Pool{New: func() any {
+			v := make([]byte, 1024)
+			return &v
+		}}
+
+		ch := make(chan *[]byte)
+		go func() {
+			for item := range ch {
+				pool.Put(item)
+			}
+		}()
+		defer close(ch)
+
+		// Warmup
+		ch <- pool.Get().(*[]byte)
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			ch <- pool.Get().(*[]byte)
+		}
+	})
 }
 
 func assertEqual(t *testing.T, expected, got interface{}) {
